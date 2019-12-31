@@ -7,6 +7,9 @@ namespace MPL.Integration.OpSkins.Trade
     [CollectionDataContract()]
     public class ItemList : List<Item>
     {
+        public ItemList()
+        { }
+
         #region Methods
         #region _Public_
         /// <summary>

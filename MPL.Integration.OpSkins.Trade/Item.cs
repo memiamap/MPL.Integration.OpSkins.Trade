@@ -7,40 +7,93 @@ namespace MPL.Integration.OpSkins.Trade
     /// A class that defines an item.
     /// </summary>
     [DataContract()]
-    public class Item : IComparable<Item>, IComparable
+    public class Item : IComparable<Item>, IComparable, IExtensibleDataObject
     {
+        public Item()
+        { }
+
         #region Declarations
         #region _Members_
-        private string _Category;
-        private string _Colour;
-        private string _EthereumInspectLink;
-        private int _ID;
-        private ItemImages _Images;
-        private string _Inspect;
-        private int _InternalAppID;
-        private bool _IsMissing;
-        private string _Name;
-        private string _PaintIndex;
-        private string _PatternIndex; 
-        private ItemPreviewURLs _PreviewURLs;
-        private string _Rarity;
-        private int _Sku;
-        private int _SuggestedPrice;
+        private ExtensionDataObject _ExtensionData;
         private float _SuggestedPriceFloat;
-        private int _SuggestedPriceFloor;
         private float _SuggestedPriceFloorFloat;
-        private string _TradeHoldExpiry;
-        private string _Type;
-        private string _Wear;
 
         #endregion
         #endregion
 
         #region Methods
+        #region _Private_
+        private void LoadFromExtensionData()
+        {
+            JsonExtensionDataItemCollection Data;
+            JsonExtensionDataItem ImageItem;
+
+            Data = HelperFunctions.ConvertExtensionData(_ExtensionData);
+            ImageItem = Data.GetItemByName("image");
+            if (ImageItem != null)
+            {
+                if (ImageItem.IsClassType)
+                {
+                    if (ImageItem.Items.Count == 2)
+                    {
+                        Images = new ItemImages
+                        {
+                            SmallImage = ImageItem.Items[0].Value.ToString(),
+                            LargeImage = ImageItem.Items[1].Value.ToString()
+                        };
+                    }
+                    else
+                    {
+                        string SmallImage = null;
+                        string LargeImage = null;
+
+                        foreach (JsonExtensionDataItem Item in ImageItem.Items)
+                        {
+                            string ItemValue;
+
+                            ItemValue = Item.Value.ToString();
+                            if (ItemValue.Contains("-300."))
+                            {
+                                SmallImage = ItemValue;
+                            }
+                            else if (ItemValue.Contains("-600."))
+                            {
+                                LargeImage = ItemValue;
+                            }
+                        }
+
+                        if (SmallImage == null)
+                            SmallImage = ImageItem.Items[0].Value.ToString();
+                        if (LargeImage == null)
+                            LargeImage = ImageItem.Items[0].Value.ToString();
+
+                        Images = new ItemImages
+                        {
+                            SmallImage = SmallImage,
+                            LargeImage = LargeImage
+                        };
+                    }
+                }
+                else if (ImageItem.DataType.Name == "String")
+                {
+                    Images = new ItemImages
+                    {
+                        SmallImage = ImageItem.Value.ToString(),
+                        LargeImage = ImageItem.Value.ToString()
+                    };
+                }
+                else
+                {
+                    Console.WriteLine("WTF");
+                }
+            }
+        }
+
+        #endregion
         #region _Public_
         public override string ToString()
         {
-            return string.Format("{0} - {1}", _Name, _SuggestedPrice);
+            return string.Format("{0} - {1}", Name, SuggestedPrice);
         }
 
         #endregion
@@ -51,151 +104,106 @@ namespace MPL.Integration.OpSkins.Trade
         /// Gets the item's category.
         /// </summary>
         [DataMember(Name = "category")]
-        public string Category
-        {
-            get { return _Category; }
-            private set { _Category = value; }
-        }
+        public string Category { get; private set; }
 
         /// <summary>
         /// Gets the item's colour.
         /// </summary>
         [DataMember(Name = "color")]
-        public string Colour
-        {
-            get { return _Colour; }
-            private set { _Colour = value; }
-        }
+        public string Colour { get; private set; }
 
         /// <summary>
         /// Gets a link to inspect the Ethereum blockchain used to generate the item.
         /// </summary>
         [DataMember(Name = "eth_inspect")]
-        public string EthereumInspectLink
+        public string EthereumInspectLink { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the extension data for this class.
+        /// </summary>
+        public ExtensionDataObject ExtensionData
         {
-            get { return _EthereumInspectLink; }
-            private set { _EthereumInspectLink = value; }
+            get
+            {
+                return _ExtensionData;
+            }
+            set
+            {
+                _ExtensionData = value;
+                LoadFromExtensionData();
+            }
         }
 
         /// <summary>
         /// Gets the item's identifier.
         /// </summary>
         [DataMember(Name = "id")]
-        public int ID
-        {
-            get { return _ID; }
-            private set { _ID = value; }
-        }
+        public int ID { get; private set; }
 
         /// <summary>
         /// Gets the item's images.
         /// </summary>
-        [DataMember(Name = "image")]
-        public ItemImages Images
-        {
-            get { return _Images; }
-            private set { _Images = value; }
-        }
+        public ItemImages Images { get; private set; }
 
         /// <summary>
         /// Gets the an inspection link for the item.
         /// </summary>
         [DataMember(Name = "inspect")]
-        public string Inspect
-        {
-            get { return _Inspect; }
-            private set { _Inspect = value; }
-        }
+        public string Inspect { get; private set; }
 
         /// <summary>
         /// Gets the item's internal application identifier.
         /// </summary>
         [DataMember(Name = "internal_app_id")]
-        public int InternalAppID
-        {
-            get { return _InternalAppID; }
-            private set { _InternalAppID = value; }
-        }
+        public int InternalAppID { get; private set; }
 
         /// <summary>
         /// Gets an indication of whether the item is missing.
         /// </summary>
         [DataMember(Name = "missing")]
-        public bool IsMissing
-        {
-            get { return _IsMissing; }
-            private set { _IsMissing = value; }
-        }
+        public bool IsMissing { get; private set; }
 
         /// <summary>
         /// Gets the item's name.
         /// </summary>
         [DataMember(Name = "name")]
-        public string Name
-        {
-            get { return _Name; }
-            private set { _Name = value; }
-        }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Gets the item's paint index.
         /// </summary>
         [DataMember(Name = "paint_index")]
-        public string PaintIndex
-        {
-            get { return _PaintIndex; }
-            private set { _PaintIndex = value; }
-        }
+        public string PaintIndex { get; private set; }
 
         /// <summary>
         /// Gets the item's pattern index.
         /// </summary>
         [DataMember(Name = "pattern_index")]
-        public string PatternIndex
-        {
-            get { return _PatternIndex; }
-            private set { _PatternIndex = value; }
-        }
+        public string PatternIndex { get; private set; }
 
         /// <summary>
         /// Gets the item's preview URLs.
         /// </summary>
         [DataMember(Name = "preview_urls")]
-        public ItemPreviewURLs PreviewURLs
-        {
-            get { return _PreviewURLs; }
-            private set { _PreviewURLs = value; }
-        }
+        public ItemPreviewURLs PreviewURLs { get; private set; }
 
         /// <summary>
         /// Gets the item's rarity.
         /// </summary>
         [DataMember(Name = "rarity")]
-        public string Rarity
-        {
-            get { return _Rarity; }
-            private set { _Rarity = value; }
-        }
+        public string Rarity { get; private set; }
 
         /// <summary>
         /// Gets the item's SKU.
         /// </summary>
         [DataMember(Name = "sku")]
-        public int Sku
-        {
-            get { return _Sku; }
-            private set { _Sku = value; }
-        }
+        public int Sku { get; private set; }
 
         /// <summary>
         /// Gets the suggested price for the item.
         /// </summary>
         [DataMember(Name = "suggested_price")]
-        public int SuggestedPrice
-        {
-            get { return _SuggestedPrice; }
-            private set { _SuggestedPrice = value; }
-        }
+        public int? SuggestedPrice { get; private set; }
 
         /// <summary>
         /// Gets the suggested price for the item.
@@ -205,7 +213,7 @@ namespace MPL.Integration.OpSkins.Trade
             get 
             {
                 if (_SuggestedPriceFloat == 0)
-                    _SuggestedPriceFloat = (float)_SuggestedPrice / 100;
+                    _SuggestedPriceFloat = (float)SuggestedPrice / 100;
 
                 return _SuggestedPriceFloat; 
             }
@@ -215,11 +223,7 @@ namespace MPL.Integration.OpSkins.Trade
         /// Gets the suggested price for the item (floor).
         /// </summary>
         [DataMember(Name = "suggested_price_floor")]
-        public int SuggestedPriceFloor
-        {
-            get { return _SuggestedPriceFloor; }
-            private set { _SuggestedPriceFloor = value; }
-        }
+        public int? SuggestedPriceFloor { get; private set; }
 
         /// <summary>
         /// Gets the suggested price for the item.
@@ -229,7 +233,7 @@ namespace MPL.Integration.OpSkins.Trade
             get
             {
                 if (_SuggestedPriceFloorFloat == 0)
-                    _SuggestedPriceFloorFloat = (float)_SuggestedPriceFloor / 100;
+                    _SuggestedPriceFloorFloat = (float)SuggestedPriceFloor / 100;
 
                 return _SuggestedPriceFloorFloat;
             }
@@ -239,31 +243,19 @@ namespace MPL.Integration.OpSkins.Trade
         /// Gets the timestamp of the trade hold expiry.
         /// </summary>
         [DataMember(Name = "trade_hold_expires")]
-        public string TradeHoldExpiry
-        {
-            get { return _TradeHoldExpiry; }
-            private set { _TradeHoldExpiry = value; }
-        }
+        public string TradeHoldExpiry { get; private set; }
 
         /// <summary>
         /// Gets the item type.
         /// </summary>
         [DataMember(Name = "type")]
-        public string Type
-        {
-            get { return _Type; }
-            private set { _Type = value; }
-        }
+        public string Type { get; private set; }
 
         /// <summary>
         /// Gets the item wear float.
         /// </summary>
         [DataMember(Name = "wear")]
-        public string Wear
-        {
-            get { return _Wear; }
-            private set { _Wear = value; }
-        }
+        public string Wear { get; private set; }
 
         #endregion
 
@@ -287,7 +279,14 @@ namespace MPL.Integration.OpSkins.Trade
 
             if (other != null)
             {
-                ReturnValue = this.SuggestedPrice.CompareTo(other.SuggestedPrice);
+                int MyPrice = 0;
+                int OtherPrice = 0;
+
+                if (this.SuggestedPrice.HasValue)
+                    MyPrice = this.SuggestedPrice.Value;
+                if (other.SuggestedPrice.HasValue)
+                    OtherPrice = other.SuggestedPrice.Value;
+                ReturnValue = MyPrice.CompareTo(OtherPrice);
                 if (ReturnValue == 0)
                 {
                     ReturnValue = this.Name.CompareTo(other.Name);

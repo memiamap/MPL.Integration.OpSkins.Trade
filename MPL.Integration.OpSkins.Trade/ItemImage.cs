@@ -25,7 +25,7 @@ namespace MPL.Integration.OpSkins.Trade
         public string LargeImage
         {
             get { return _LargeImage; }
-            private set { _LargeImage = value; }
+            set { _LargeImage = value; }
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace MPL.Integration.OpSkins.Trade
         public string SmallImage
         {
             get { return _SmallImage; }
-            private set { _SmallImage = value; }
+            set { _SmallImage = value; }
         }
 
         #endregion

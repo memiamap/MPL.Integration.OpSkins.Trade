@@ -9,5 +9,7 @@ namespace MPL.Integration.OpSkins.Trade
     [DataContract()]
     public class ResponseBase
     {
+        public ResponseBase()
+        { }
     }
 }

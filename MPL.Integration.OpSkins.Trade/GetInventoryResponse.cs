@@ -10,6 +10,9 @@ namespace MPL.Integration.OpSkins.Trade
     [DataContract()]
     public class GetInventoryResponse : ResponseBase
     {
+        public GetInventoryResponse()
+        { }
+
         #region Declarations
         #region _Members_
         private ItemList _Items;
@@ -29,6 +32,11 @@ namespace MPL.Integration.OpSkins.Trade
             get { return _Items; }
             private set { _Items = value; }
         }
+
+        [DataMember(Name = "items_in_active_offers", IsRequired = false, EmitDefaultValue = false)]
+        public object ItemsInOffers { get; private set; }
+        [DataMember(Name = "user_data", IsRequired = false, EmitDefaultValue = false)]
+        public object User { get; private set; }
 
         /// <summary>
         /// Gets the sort parameters.
